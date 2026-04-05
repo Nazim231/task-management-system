@@ -1,3 +1,4 @@
+import { TaskCreate } from '../types/task';
 import { UserRegistration } from '../types/user';
 import { ValidationError } from '../types/validation';
 
@@ -40,4 +41,16 @@ export function validateUserData(data: UserRegistration): ValidationError {
     valid: validName && credentials.valid,
     errors,
   };
+}
+
+export function validateTaskToCreate(data: TaskCreate) {
+  if (
+    data.title.trim() &&
+    typeof data.title == 'string' &&
+    data.title.length > 0
+  )
+    return { success: true };
+  else {
+    return { success: false, error: { title: 'Invalid title' } };
+  }
 }

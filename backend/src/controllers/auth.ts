@@ -65,7 +65,7 @@ class AuthController {
       // Token generation and adding in client cookies
       await this.generateAndAssignTokens(res, user);
 
-      return requestCompleted(res, 'User Registered Successfully', { user });
+      return requestCompleted(res, 'User Registered Successfully', user);
     } catch (error) {
       console.error('Registration error:', error);
       return requestFailed(res, 500, 'Internal server error');
@@ -96,7 +96,7 @@ class AuthController {
 
     await this.generateAndAssignTokens(res, partialUser as PartialUser);
 
-    return requestCompleted(res, 'Login success');
+    return requestCompleted(res, 'Login success', partialUser);
   }
 
   async refresh(req: Request, res: Response) {
