@@ -21,24 +21,6 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
-axiosInstance.interceptors.response.use(async (config) => {
-  console.log('Response Received', config);
-  if (config.status == 401) {
-    // The request was declined because of Token expiry
-    const refToken = localStorage.getItem(TokenType.REFRESH_TOKEN);
-    const result = await post<TokenPair>('/auth/refresh', {
-      refreshToken: refToken,
-    });
-    if (result.success && result.data) {
-      localStorage.setItem(TokenType.ACCESS_TOKEN, result.data.accessToken);
-      localStorage.setItem(TokenType.REFRESH_TOKEN, result.data.refreshToken);
-    } else {
-      removeDataAndRedirectToLogin();
-    }
-  }
-  return config;
-});
-
 export async function get<T extends Record<string, any>>(
   url: string,
 ): Promise<ApiResponse<T>> {

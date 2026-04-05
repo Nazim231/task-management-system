@@ -120,13 +120,13 @@ class AuthController {
       // Verify the refresh token
       const sessionData = await verifyRefreshToken(refreshToken);
       if (!sessionData) {
-        return requestFailed(res, 401, 'Invalid or expired refresh token');
+        return requestFailed(res, 403, 'Invalid or expired refresh token');
       }
 
       const user = await this.getUserById(sessionData.userId);
 
       if (!user) {
-        return requestFailed(res, 401, 'Invalid refresh token');
+        return requestFailed(res, 403, 'Invalid refresh token');
       }
 
       const { password, updatedAt, ...partialUser } = user;
