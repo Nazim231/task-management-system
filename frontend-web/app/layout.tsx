@@ -28,6 +28,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={cn('h-full', 'antialiased', geistSans.variable, geistMono.variable, 'font-sans', geist.variable)}>
+      <head>
+        <title>Task Management System</title>
+      </head>
       <body className="min-h-full flex flex-col">
         <main>{children}</main>
         <Toaster richColors position='top-center' closeButton />
