@@ -105,15 +105,16 @@ class AuthController {
     });
   }
 
-  async refresh(req: Request, res: Response) {
+  async refresh(
+    req: Request<any, ApiResponse, { [Constants.REFRESH_TOKEN]: string }>,
+    res: Response,
+  ) {
     try {
       // Get refresh token from cookies or authorization header
-      const refreshToken =
-        req.cookies?.[Constants.REFRESH_TOKEN] ||
-        req.headers.authorization?.split(' ')[1];
+      const refreshToken = req.body[Constants.REFRESH_TOKEN];
 
       if (!refreshToken) {
-        return requestFailed(res, 401, 'Refresh token required');
+        return requestFailed(res, 403, 'Refresh token required');
       }
 
       // Verify the refresh token
@@ -131,13 +132,16 @@ class AuthController {
       const { password, updatedAt, ...partialUser } = user;
 
       // Generate new tokens
-      await this.generateAndAssignTokens(
+      const {accessToken, refreshToken: rotatedRefreshToken} = await this.generateAndAssignTokens(
         res,
         partialUser,
         sessionData.sessionId,
       );
 
-      return requestCompleted(res, 'Token refreshed successfully');
+      return requestCompleted(res, 'Token refreshed successfully', {
+        [Constants.ACCESS_TOKEN]: accessToken,
+        [Constants.REFRESH_TOKEN]: rotatedRefreshToken
+      });
     } catch (error) {
       console.error('Token refresh error:', error);
       return requestFailed(res, 500, 'Internal server error');

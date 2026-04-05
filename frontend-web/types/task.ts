@@ -1,5 +1,13 @@
 import { z } from 'zod';
 
+
+export type TaskQuery = {
+  search: string;
+  status: string;
+  sort: string;
+  page: number;
+};
+
 export const taskSchema = z.object({
   title: z.string(),
   description: z.string().optional(),

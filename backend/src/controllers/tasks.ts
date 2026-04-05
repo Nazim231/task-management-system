@@ -30,22 +30,21 @@ class TaskController {
       },
     });
 
-    return requestCompleted(res, "Task created successfully", createdTask);
+    return requestCompleted(res, 'Task created successfully', createdTask);
   }
 
   async get(req: Request, res: Response) {
     try {
-      const userId: string = '';
       const tasks = await prisma.task.findMany({
         where: {
-          userId,
+          userId: req.user.id,
         },
         orderBy: {
           createdAt: 'desc',
         },
       });
 
-      return res.json(tasks);
+      return requestCompleted(res, 'Tasks Fetched', tasks);
     } catch (error) {
       console.error('Error fetching tasks:', error);
       return res.status(500).json({ error: 'Internal server error' });

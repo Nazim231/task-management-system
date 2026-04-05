@@ -1,14 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Task } from '@/types/task';
+import { Task, TaskQuery } from '@/types/task';
+import { get } from '@/lib/axios';
 
-type Query = {
-  search: string;
-  status: string;
-  sort: string;
-  page: number;
-};
-
-export function useTasks(query: Query) {
+export function useTasks(query: TaskQuery) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -20,12 +14,11 @@ export function useTasks(query: Query) {
       page: String(query.page),
     });
 
-    // fetch(`/tasks?${params}`)
-    //   .then((res) => res.json())
-    //   .then((data) => {
-    //     setTasks(data.tasks);
-    //     setTotalPages(data.totalPages);
-    //   });
+    get<Task[]>('/tasks').then((result) => {
+      if (result.success) {
+        setTasks(result.data ?? []);
+      }
+    });
   }, [query]);
 
   const addTask = useCallback(

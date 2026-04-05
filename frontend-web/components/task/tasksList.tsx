@@ -1,8 +1,10 @@
-import { ComponentProps, JSX, useCallback, useEffect, useState } from 'react';
+'use client';
+
+import { ComponentProps, JSX, useCallback, useState } from 'react';
 import TaskFilters from './filter';
 import Pagination from './pagination';
 import TaskCard from './task';
-import { Task, TaskCreate, taskSchema, TaskStatus } from '@/types/task';
+import { Task, TaskCreate, TaskQuery, taskSchema, TaskStatus } from '@/types/task';
 import { useTasks } from '@/hooks/useTasks';
 import { Card } from '../ui/card';
 import { cn } from '@/lib/utils';
@@ -13,7 +15,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ZodInputField } from '../ui/zodInputField';
 import { post } from '@/lib/axios';
 import { toast } from 'sonner';
-import { boolean } from 'zod';
 
 export default function TaskList({ className, ...props }: ComponentProps<'div'>) {
   const [search, setSearch] = useState('');
@@ -21,12 +22,14 @@ export default function TaskList({ className, ...props }: ComponentProps<'div'>)
   const [sort, setSort] = useState('latest');
   const [page, setPage] = useState(1);
 
-  const { tasks, totalPages, addTask } = useTasks({
-    search,
-    status,
-    sort,
-    page,
+  const [taskQuery, setTaskQuery] = useState<TaskQuery>({
+    search: '',
+    status: TaskStatus.ALL,
+    sort: 'latest',
+    page: 1,
   });
+
+  const { tasks, totalPages, addTask } = useTasks(taskQuery);
 
   return (
     <div>
