@@ -1,3 +1,4 @@
+import { TokenType } from '@/types/auth';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 
 type ApiResponse<T extends Record<string, any>> =
@@ -9,18 +10,9 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-// Helper function to get cookie value by name
-function getCookie(name: string): string | null {
-  if (typeof document === 'undefined') return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-}
-
 // Adding the access token in the authorization header
 axiosInstance.interceptors.request.use((config) => {
-  const accessToken = getCookie('access-token');
+  const accessToken = localStorage.getItem(TokenType.ACCESS_TOKEN);
 
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;

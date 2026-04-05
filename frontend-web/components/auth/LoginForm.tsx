@@ -12,12 +12,12 @@ import { post } from '@/lib/axios';
 import { ZodInputField } from '../ui/zodInputField';
 import { useAuthStore } from '@/lib/store/authStore';
 import { loginSchema, type LoginFormData } from '@/types/forms';
-import type { AuthUser } from '@/types/auth';
+import { TokenType, type AuthUser, type TokenPair } from '@/types/auth';
 
 export function LoginForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const { setUser } = useAuthStore();
+  const setUser= useAuthStore(state => state.setUser);
 
   const {
     register,
@@ -31,7 +31,7 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
-    const response = await post<AuthUser>('/auth/login', data);
+    const response = await post<{ user: AuthUser; tokens: TokenPair }>('/auth/login', data);
 
     if (response.success) {
       toast.success('Login successful!');
@@ -39,9 +39,10 @@ export function LoginForm() {
 
       // Store user in auth store if response.data contains user info
       if (response.data) {
-        // localStorage.setItem('accessToken', response.data.accessToken);
-        console.log('Response Data: ', response.data);
-        setUser(response.data);
+        localStorage.setItem(TokenType.ACCESS_TOKEN, response.data.tokens[TokenType.ACCESS_TOKEN]);
+        localStorage.setItem(TokenType.REFRESH_TOKEN, response.data.tokens[TokenType.REFRESH_TOKEN]);
+        console.log(setUser);
+        setUser(response.data.user);
       }
       router.push('/tasks');
     } else if (response.errors) {

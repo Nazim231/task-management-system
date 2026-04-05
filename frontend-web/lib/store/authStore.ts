@@ -2,11 +2,17 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { AuthUser, AuthStore } from '@/types/auth';
 
-export const useAuthStore = create<AuthStore>()(
+interface ExtendedAuthStore extends AuthStore {
+  hasHydrated: boolean;
+  setHydrated: (hasHydrated: boolean) => void;
+}
+
+export const useAuthStore = create<ExtendedAuthStore>()(
   persist(
     (set) => ({
       user: null,
       isAuthenticated: false,
+      hasHydrated: false,
 
       setUser: (user: AuthUser) =>
         set({
@@ -19,6 +25,8 @@ export const useAuthStore = create<AuthStore>()(
           user: null,
           isAuthenticated: false,
         }),
+
+      setHydrated: (hasHydrated) => set({ hasHydrated }),
     }),
     {
       name: 'auth-store',
@@ -26,6 +34,9 @@ export const useAuthStore = create<AuthStore>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated(true);
+      },
     },
   ),
 );

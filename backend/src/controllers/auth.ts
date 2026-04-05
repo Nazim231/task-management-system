@@ -94,9 +94,15 @@ class AuthController {
 
     const { password: psk, updatedAt, ...partialUser } = user;
 
-    await this.generateAndAssignTokens(res, partialUser as PartialUser);
+    const tokens = await this.generateAndAssignTokens(
+      res,
+      partialUser as PartialUser,
+    );
 
-    return requestCompleted(res, 'Login success', partialUser);
+    return requestCompleted(res, 'Login success', {
+      user: partialUser,
+      tokens,
+    });
   }
 
   async refresh(req: Request, res: Response) {
@@ -122,10 +128,14 @@ class AuthController {
         return requestFailed(res, 401, 'Invalid refresh token');
       }
 
-      const {password, updatedAt, ...partialUser} = user;
+      const { password, updatedAt, ...partialUser } = user;
 
       // Generate new tokens
-      await this.generateAndAssignTokens(res, partialUser, sessionData.sessionId);
+      await this.generateAndAssignTokens(
+        res,
+        partialUser,
+        sessionData.sessionId,
+      );
 
       return requestCompleted(res, 'Token refreshed successfully');
     } catch (error) {
@@ -161,7 +171,11 @@ class AuthController {
     return (await prisma.user.findUnique({ where: { id } })) as User;
   }
 
-  async generateAndAssignTokens(res: Response, user: PartialUser, sessionId?: string) {
+  async generateAndAssignTokens(
+    res: Response,
+    user: PartialUser,
+    sessionId?: string,
+  ) {
     const tokens = await generateTokens(user);
 
     res.cookie(Constants.ACCESS_TOKEN, tokens.accessToken);

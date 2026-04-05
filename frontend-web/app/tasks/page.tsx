@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
 import { post } from '@/lib/axios';
 import { toast } from 'sonner';
-import { JSX, useEffect } from 'react';
+import { JSX } from 'react';
 import { cn } from '@/lib/utils';
 import TaskList from '@/components/task/tasksList';
 

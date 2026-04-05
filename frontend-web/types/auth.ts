@@ -15,3 +15,8 @@ export interface TokenPair {
   refreshToken: string;
   accessToken: string;
 }
+
+export enum TokenType {
+  ACCESS_TOKEN = 'accessToken',
+  REFRESH_TOKEN = 'refreshToken',
+}
