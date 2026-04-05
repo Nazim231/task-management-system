@@ -14,6 +14,14 @@ import { Constants } from '../lib/constants';
 import { User } from '../generated/prisma/client';
 
 class AuthController {
+  constructor() {
+    // Bind methods to preserve 'this' context
+    this.register = this.register.bind(this);
+    this.login = this.login.bind(this);
+    this.refresh = this.refresh.bind(this);
+    this.logout = this.logout.bind(this);
+  }
+
   async register(
     req: Request<any, ApiResponse, UserRegistration>,
     res: Response<ApiResponse>,
