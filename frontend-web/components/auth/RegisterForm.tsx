@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -11,26 +10,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import { post } from '@/lib/axios';
 import { ZodInputField } from '../ui/zodInputField';
-// Validation schema
-const registerSchema = z
-  .object({
-    name: z.string().min(2, 'Name must be at least 2 characters'),
-    email: z.string().email('Invalid email address'),
-    password: z
-      .string()
-      .min(8, 'Password must be at least 8 characters')
-      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-      .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-      .regex(/\d/, 'Password must contain at least one number')
-      .regex(/[@$!%*?&]/, 'Password must contain at least one special character (@$!%*?&)'),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
-
-type RegisterFormData = z.infer<typeof registerSchema>;
+import { registerSchema, type RegisterFormData } from '@/types/forms';
 
 export function RegisterForm() {
   const router = useRouter();
@@ -55,7 +35,7 @@ export function RegisterForm() {
     if (response.success) {
       toast.success('Registration successful!');
       reset();
-      router.push('/dashboard');
+      router.push('/tasks');
     } else if (response.errors) {
       Object.entries(response.errors).forEach(([field, message]) => {
         setError(field as keyof RegisterFormData, { message });
@@ -113,7 +93,7 @@ export function RegisterForm() {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Already have an account?{' '}
-            <Link href="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
+            <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
               Sign in
             </Link>
           </p>

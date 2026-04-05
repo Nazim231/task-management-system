@@ -29,6 +29,15 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
+axiosInstance.interceptors.response.use((config) => {
+  
+  if (config.status == 401) {
+    // The request was declined because of Token expiry
+    
+  }
+  return config;
+})
+
 export async function get<T extends Record<string, any>>(
   url: string,
 ): Promise<ApiResponse<T>> {

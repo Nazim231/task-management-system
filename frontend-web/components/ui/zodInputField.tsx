@@ -1,15 +1,5 @@
 import { Input } from './input';
-import type { UseFormRegister } from 'react-hook-form';
-
-export type InputProps = {
-  label: string;
-  name: string;
-  type: string;
-  placeholder?: string;
-  disabled?: boolean;
-  error?: string;
-  zodRegister: UseFormRegister<any>;
-};
+import type { InputProps } from '@/types/components';
 
 export function ZodInputField(props: InputProps) {
   return (

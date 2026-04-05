@@ -3,27 +3,21 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { post } from '@/lib/axios';
 import { ZodInputField } from '../ui/zodInputField';
-
-// Validation schema
-const loginSchema = z.object({
-  email: z.email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+import { useAuthStore } from '@/lib/store/authStore';
+import { loginSchema, type LoginFormData } from '@/types/forms';
+import type { AuthUser } from '@/types/auth';
 
 export function LoginForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const { setUser } = useAuthStore();
 
   const {
     register,
@@ -37,17 +31,19 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
-    type TokenPair = { refreshToken: string; accessToken: string };
-    const response = await post<TokenPair>('/auth/login', data);
+    const response = await post<AuthUser>('/auth/login', data);
 
     if (response.success) {
       toast.success('Login successful!');
       reset();
-      // Store token if provided in response
+
+      // Store user in auth store if response.data contains user info
       if (response.data) {
-        localStorage.setItem('accessToken', response.data.accessToken);
+        // localStorage.setItem('accessToken', response.data.accessToken);
+        console.log('Response Data: ', response.data);
+        setUser(response.data);
       }
-      router.push('/dashboard');
+      router.push('/tasks');
     } else if (response.errors) {
       Object.entries(response.errors).forEach(([field, err]) => {
         setError(field as keyof LoginFormData, { message: err });
