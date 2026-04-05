@@ -7,8 +7,6 @@ export function validateCredentials(
 ): ValidationError {
   const errors: Record<string, string> = {};
 
-  console.log(`Credentials: ${email}, ${password}`)
-
   // Email validation regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!email || !emailRegex.test(email)) {

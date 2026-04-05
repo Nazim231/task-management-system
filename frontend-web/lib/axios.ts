@@ -39,7 +39,6 @@ export async function get<T extends Record<string, any>>(
         withCredentials: true,
       },
     );
-    console.log(result);
     if (!result.data.success) throw result.data;
 
     return result.data;
@@ -64,14 +63,13 @@ export async function post<T extends Record<string, any>>(
         withCredentials: true,
       },
     );
-    console.log(result);
 
     return result.data;
   } catch (error: any) {
-    if (error.isAxiosError) {
+    if (error.isAxiosError && error.response) {
       return (error as AxiosError).response?.data as ApiResponse<any>;
     } else {
-      return error;
+      return {success: false, message: error.message};
     }
   }
 }

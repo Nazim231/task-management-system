@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { post } from '@/lib/axios';
+import { ZodInputField } from '../ui/zodInputField';
 
 // Validation schema
 const loginSchema = z.object({
@@ -48,15 +49,22 @@ export function LoginForm() {
       }
       router.push('/dashboard');
     } else if (response.errors) {
-      console.log('Failed request, ', response);
       Object.entries(response.errors).forEach(([field, err]) => {
-        console.log(`Error: ${field}: ${err}`);
         setError(field as keyof LoginFormData, { message: err });
       });
-    }
-    toast.error(response.message);
+    } else toast.error(response.message);
     setIsLoading(false);
   };
+
+  const fields = [
+    { name: 'email', label: 'Email', placeholder: 'example@ex.co', type: 'email' },
+    {
+      name: 'password',
+      label: 'Password',
+      placeholder: '••••••••',
+      type: 'password',
+    },
+  ];
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
@@ -67,37 +75,15 @@ export function LoginForm() {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" method="POST">
-          {/* Email Field */}
-          <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email Address
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              {...register('email')}
-              className="w-full"
+          {fields.map((f) => (
+            <ZodInputField
+              key={f.name}
+              zodRegister={register}
+              {...f}
               disabled={isLoading}
+              error={errors[f.name as keyof LoginFormData] && errors[f.name as keyof LoginFormData]?.message}
             />
-            {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
-          </div>
-
-          {/* Password Field */}
-          <div className="space-y-2">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              {...register('password')}
-              className="w-full"
-              disabled={isLoading}
-            />
-            {errors.password && <p className="text-sm text-red-600">{errors.password.message}</p>}
-          </div>
+          ))}
 
           {/* Submit Button */}
           <Button type="submit" className="w-full" disabled={isLoading}>
@@ -109,7 +95,7 @@ export function LoginForm() {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{' '}
-            <Link href="/auth/register" className="font-medium text-blue-600 hover:text-blue-500">
+            <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
               Sign up
             </Link>
           </p>
