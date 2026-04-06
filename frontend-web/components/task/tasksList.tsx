@@ -1,10 +1,10 @@
 'use client';
 
-import { ComponentProps, JSX, useCallback, useState } from 'react';
+import { ComponentProps, useCallback, useState } from 'react';
 import TaskFilters from './filter';
 import Pagination from './pagination';
-import TaskCard from './task';
-import { Task, TaskCreate, TaskQuery, taskSchema, TaskStatus } from '@/types/task';
+import TaskListItem from './task';
+import { Task, TaskListItem as TaskListItemT, TaskCreate, TaskQuery, taskSchema, TaskStatus } from '@/types/task';
 import { useTasks } from '@/hooks/useTasks';
 import { Card } from '../ui/card';
 import { cn } from '@/lib/utils';
@@ -17,11 +17,6 @@ import { post } from '@/lib/axios';
 import { toast } from 'sonner';
 
 export default function TaskList({ className, ...props }: ComponentProps<'div'>) {
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<TaskStatus>(TaskStatus.ALL);
-  const [sort, setSort] = useState('latest');
-  const [page, setPage] = useState(1);
-
   const [taskQuery, setTaskQuery] = useState<TaskQuery>({
     search: '',
     status: TaskStatus.ALL,
@@ -31,6 +26,13 @@ export default function TaskList({ className, ...props }: ComponentProps<'div'>)
 
   const { tasks, totalPages, addTask } = useTasks(taskQuery);
 
+  const updateQueryByKey = useCallback(
+    (key: keyof TaskQuery, value: string | number | TaskStatus) => {
+      setTaskQuery((prev) => ({ ...prev, [key]: value }));
+    },
+    [taskQuery],
+  );
+
   return (
     <div>
       <Card className={cn('p-6', className)} {...props}>
@@ -38,15 +40,15 @@ export default function TaskList({ className, ...props }: ComponentProps<'div'>)
           <p className="text-2xl font-medium">Tasks</p>
           <TaskDialog addTask={addTask} />
         </div>
-        <TaskFilters search={search} status={status} sort={sort} setSearch={setSearch} setStatus={setStatus} setSort={setSort} />
+        <TaskFilters search={taskQuery.search} status={taskQuery.status} sort={taskQuery.sort} queryUpdater={updateQueryByKey} />
         <Tasks tasks={tasks} />
-        <Pagination page={page} totalPages={totalPages} setPage={setPage} />
+        <Pagination page={taskQuery.page} totalPages={totalPages} setPage={(pageNumber) => updateQueryByKey('page', pageNumber)} />
       </Card>
     </div>
   );
 }
 
-function Tasks({ tasks }: { tasks: Task[] }) {
+function Tasks({ tasks }: { tasks: TaskListItemT[] }) {
   if (!tasks.length) {
     return <p>No tasks found</p>;
   }
@@ -54,7 +56,7 @@ function Tasks({ tasks }: { tasks: Task[] }) {
   return (
     <div className="space-y-4">
       {tasks.map((task) => (
-        <TaskCard key={task.id} task={task} />
+        <TaskListItem key={task.id} task={task} />
       ))}
     </div>
   );

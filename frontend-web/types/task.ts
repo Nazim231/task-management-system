@@ -3,8 +3,8 @@ import { z } from 'zod';
 
 export type TaskQuery = {
   search: string;
-  status: string;
-  sort: string;
+  status: TaskStatus;
+  sort: 'latest' | 'oldest';
   page: number;
 };
 
@@ -21,6 +21,11 @@ type TaskMeta = {
 };
 export type TaskCreate = z.infer<typeof taskSchema>;
 export type Task = TaskCreate & TaskMeta;
+export type TaskListItem = {
+  id: TaskMeta['id'];
+  status: TaskMeta['status'];
+  title: TaskCreate['title'];
+}
 
 // export type TaskStatus = 'all' | 'completed' | 'pending';
 

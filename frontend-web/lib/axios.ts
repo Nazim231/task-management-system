@@ -23,12 +23,14 @@ axiosInstance.interceptors.request.use((config) => {
 
 export async function get<T extends Record<string, any>>(
   url: string,
+  params?: Record<string, any>
 ): Promise<ApiResponse<T>> {
   try {
     const result = await axiosInstance.get<any, AxiosResponse<ApiResponse<T>>>(
       url,
       {
         withCredentials: true,
+        params: params
       },
     );
     if (!result.data.success) throw result.data;
@@ -40,7 +42,7 @@ export async function get<T extends Record<string, any>>(
       if (axiosError.status == 401) {
         console.log('uNAuthorized acces');
         const tokenRefreshed = await refreshToken();
-        if (tokenRefreshed) return get<T>(url);
+        if (tokenRefreshed) return get<T>(url, params);
       } else if (axiosError.status == 403) {
         // Failed to generate refresh token.
         removeDataAndRedirectToLogin();

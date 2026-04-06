@@ -1,9 +1,9 @@
 import type { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
-import { Task } from '../generated/prisma/client';
-import { TaskCreate } from '../types/task';
+import { TaskCreate, TaskQueryFilters } from '../types/task';
 import { validateTaskToCreate } from '../lib/validator';
 import { requestCompleted, requestFailed } from '../lib/apiResponse';
+import { TaskWhereInput } from '../generated/prisma/models';
 
 class TaskController {
   async create(req: Request<any, any, TaskCreate>, res: Response) {
@@ -33,15 +33,30 @@ class TaskController {
     return requestCompleted(res, 'Task created successfully', createdTask);
   }
 
-  async get(req: Request, res: Response) {
+  async getAll(req: Request<any, any, any, TaskQueryFilters>, res: Response) {
+    const params: TaskQueryFilters = req.query;
+    const where: TaskWhereInput = {};
+
+    if (params.search.trim()) {
+      where.title = { contains: params.search };
+    }
+    if (params.status && params.status.toLowerCase() != 'all') {
+      where.status = params.status;
+    }
+
     try {
       const tasks = await prisma.task.findMany({
-        where: {
-          userId: req.user.id,
+        select: {
+          id: true,
+          title: true,
+          status: true,
         },
+        where,
         orderBy: {
-          createdAt: 'desc',
+          createdAt: params.sort == 'latest' ? 'desc' : 'asc',
         },
+        skip: (params.page - 1) * 10, //offset
+        take: 10  // limit
       });
 
       return requestCompleted(res, 'Tasks Fetched', tasks);

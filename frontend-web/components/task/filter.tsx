@@ -1,42 +1,69 @@
-import { TaskStatus } from "@/types/task";
-import { Input } from "../ui/input";
+import { TaskQuery, TaskStatus } from '@/types/task';
+import { Input } from '../ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useMemo } from 'react';
 
 type Props = {
   search: string;
   status: string;
   sort: string;
-  setSearch: (v: string) => void;
-  setStatus: (v: TaskStatus) => void;
-  setSort: (v: string) => void;
+  queryUpdater: (key: keyof TaskQuery, value: any) => void;
 };
 
-export default function TaskFilters({
-  search,
-  status,
-  sort,
-  setSearch,
-  setStatus,
-  setSort,
-}: Props) {
+type SelectorItem = { value: string; label: string };
+
+export default function TaskFilters({ search, status, sort, queryUpdater }: Props) {
+  const sortItems: SelectorItem[] = useMemo(() => {
+    return [
+      { label: 'Latest', value: 'latest' },
+      { label: 'Oldest', value: 'oldest' },
+    ];
+  }, []);
+
+  const statusItems: SelectorItem[] = useMemo(() => {
+    return [
+      { label: 'All', value: TaskStatus.ALL },
+      { label: 'Pending', value: TaskStatus.PENDING },
+      { label: 'Completed', value: TaskStatus.COMPLETED },
+    ];
+  }, []);
   return (
-    <div className="flex gap-4 mb-4 w-full">
+    <div className="flex flex-col md:flex-row gap-4 mb-4 w-full">
       <Input
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => queryUpdater('search', e.target.value)}
         placeholder="Search tasks..."
-        className="border px-3 py-2 rounded"
+        className="border px-3 py-2 flex-3"
       />
-
-      <select value={status} onChange={(e) => setStatus(e.target.value as TaskStatus)}>
-        <option value={TaskStatus.ALL}>All</option>
-        <option value={TaskStatus.PENDING}>Pending</option>
-        <option value={TaskStatus.COMPLETED}>Completed</option>
-      </select>
-
-      <select value={sort} onChange={(e) => setSort(e.target.value)}>
-        <option value="latest">Latest</option>
-        <option value="oldest">Oldest</option>
-      </select>
+      <div className="flex flex-row items-center gap-2 flex-2">
+        <Selector value={status} onValueChange={(v: string) => queryUpdater('status', v)} placeholder="Status" items={statusItems} />
+        <Selector value={sort} onValueChange={(v: string) => queryUpdater('sort', v)} placeholder="Sort" items={sortItems} />
+      </div>
     </div>
+  );
+}
+
+function Selector({
+  placeholder,
+  items,
+  value,
+  onValueChange,
+}: {
+  placeholder: string;
+  items: SelectorItem[];
+  value: string;
+  onValueChange: (v: string) => void;
+}) {
+  return (
+    <Select value={value} onValueChange={onValueChange}>
+      <SelectTrigger className='w-1/2! md:w-full'>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        {items.map((i) => (
+          <SelectItem value={i.value}>{i.label}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
